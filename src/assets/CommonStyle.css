@@ -1,0 +1,73 @@
+/deep/ .ivu-table td{
+  font-size: 14px;
+  color: #606266;
+}
+/deep/ .ivu-table-cell > div{
+  font-size: 14px;
+  color: #606266;
+}
+/deep/ th .ivu-table-cell {
+  font-size:14px;
+  font-weight:600;
+  color: #4A4A4A;
+  line-height:14px;
+}
+/deep/ .ivu-btn-default{
+  background: #FFFFFF;
+  border-radius: 3px;
+  border: 1px solid rgba(128,202,249,1);
+  color: rgba(128,202,249,1);
+  height: 40px;
+  margin-left: 10px;
+}
+/deep/ .ivu-btn:disabled{
+  background: #F5F5F5;
+  color: #D0D0D0;
+}
+/deep/ .ivu-btn-primary{
+  width: 120px;
+  height: 40px;
+  background:rgba(35,171,255,1);
+  border-radius:4px;
+}
+/deep/ .ivu-btn-info{
+  background: #FFFFFF;
+  color: #23ABFF;
+  border-radius: 3px;
+  border:1px solid rgba(220,223,230,1);
+}
+/deep/ .ivu-btn-error{
+  background: #FFFFFF;
+  color: #FF7875;
+  border-radius: 3px;
+  border:1px solid rgba(220,223,230,1);
+}
+/deep/ .ivu-btn-success{
+  background: #FFFFFF;
+  color: #22C688;
+  border-radius: 3px;
+}
+/deep/ .ivu-tag-error{
+  background-color: rgba(255,163,158,0.2);
+}
+/deep/ .ivu-tag-error > .ivu-tag-color-white{
+  color: rgba(255,163,158,1) !important;
+}
+/deep/ .ivu-tag-success{
+  background-color: rgba(34,198,136,0.2);
+}
+/deep/ .ivu-tag-success > .ivu-tag-color-white{
+  color: rgba(34,198,136,1) !important;
+}
+/deep/ .ivu-tag-warning{
+  background-color: rgba(35,171,255,0.2);
+}
+/deep/ .ivu-tag-warning > .ivu-tag-color-white{
+  color: rgba(35,171,255,1) !important;
+}
+/deep/ .ivu-tag-primary{
+  background-color: #F5F5F5;
+}
+/deep/ .ivu-tag-primary > .ivu-tag-color-white{
+  color: #D0D0D0 !important;
+}

@@ -1,0 +1,65 @@
+.input-item{
+  float: right;
+  margin-right: 22px;
+  font-size: 16px;
+  color: #606266;
+}
+.modal-title{
+  margin-top:10px;
+  height:25px;
+  font-size: 20px;
+  font-weight:500
+}
+.modal-title > span{
+  font-size: 20px !important;
+}
+/deep/ .ivu-select-single .ivu-select-selection .ivu-select-placeholder, .ivu-select-single .ivu-select-selection .ivu-select-selected-value{
+  color: #606266;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 25px;
+}
+/deep/ .ivu-select-selection{
+  color: #606266;
+  font-size: 16px !important;
+  font-weight: 500;
+  line-height: 25px;
+}
+/deep/ .ivu-select-item{
+  color: #606266;
+  font-size: 16px !important;
+  font-weight: 500;
+  line-height: 25px;
+}
+/deep/ .ivu-input{
+  font-size: 16px;
+  border-radius:4px;
+  border:1px solid rgba(220,223,230,1);
+}
+/deep/ input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
+  color: #C0C4CC;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 25px;
+}
+
+/deep/ input:-moz-placeholder, textarea:-moz-placeholder {
+  color: #C0C4CC;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 25px;
+}
+
+/deep/ input::-moz-placeholder, textarea::-moz-placeholder {
+  color: #C0C4CC;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 25px;
+}
+
+/deep/ input:-ms-input-placeholder, textarea:-ms-input-placeholder {
+  color: #C0C4CC;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 25px;
+}
