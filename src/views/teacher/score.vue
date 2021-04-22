@@ -47,11 +47,34 @@
       <div style="margin-top:10px;margin-left:20px;margin-right:20px;">
         <!-- <TableComponent2 :buttonSpan="12" :loading="loading" @refresh="refreshData2" ref="table" :columnsFromFather="columns2" :allDataFromFather="allData2">
         </TableComponent2> -->
-
+        <el-table
+          :data = "expData"
+          >
+          <el-table-column
+            type="index"
+            width="50">
+          </el-table-column>
+          <el-table-column
+            v-for="info in Header" :key="info.key"
+            :property="info.key"
+            :label="info.label"
+            >
+              <template slot-scope="scope">
+                {{scope.row[scope.column.property]}}
+              </template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-input-number v-model="expWeight[scope.$index]" oninput = "value=value.replace(/[^\d]/g,'')" :min="0" :max="100"></el-input-number>
+            </template>
+          </el-table-column>
+        </el-table>
+        <span>已分配权重总和：{{totalNum}}</span><br>
+        <span>剩余权重总和：{{100-totalNum}}</span><br>
       </div>
       <div slot="footer">
-        <Button type="text" size="large" @click="cancel">取消</Button>
-        <Button type="primary" size="large" @click="ok">确定</Button>
+        <Button type="text" size="large" @click="cancel2">取消</Button>
+        <Button type="primary" size="large" @click="ok2">确定</Button>
       </div>
     </Modal>
   </div>
@@ -85,6 +108,7 @@ export default {
   data () {
     return {
       stuID: '',
+      userId: '',
       flag: 0,
       courseName: '',
       courseID: '',
@@ -98,6 +122,7 @@ export default {
       // 请求数据的url
       allDataUrl: 'teacher/getStudentScore',
       expData: [],
+      expWeight: [],
       columns1: [
         {
           // 仅使用type:index可以达到显示行号的目的，但是将TableComponent组件中的item转为对象后发现index并不在属性中，做搜索时不太方便
@@ -180,17 +205,68 @@ export default {
             ])
           }
         }
+      ],
+      Header: [
+        {
+          label: '名称',
+          key: 'name'
+        },
+        {
+          label: '类别',
+          key: 'type'
+        }
       ]
     }
   },
+  computed: {
+    totalNum: function () {
+      let num = 0
+      for (var i = 0; i < this.expData.length; i++) {
+        if (this.expWeight[i] !== '' && this.expWeight[i] !== null && !isNaN(this.expWeight[i]) && typeof (this.expWeight[i]) !== 'undefined') {
+          num += this.expWeight[i]
+        }
+      }
+      if (isNaN(num)) {
+        num = 0
+      }
+      return num
+    }
+  },
   mounted () {
+    this.userId = this.$cookie.get('userId')
     this.courseID = sessionStorage.getItem('score_courseID')
     this.courseName = sessionStorage.getItem('score_courseName')
     this.breadList = JSON.parse(sessionStorage.getItem('score_breadList'))
     this.breadList.push({name: '成绩统计', path: this.$route.fullPath})
-    // this.loading = true
+    this.getExp()
   },
   methods: {
+    initExpWeight () {
+      for (let i = 0; i < this.expData.length; i++) {
+        console.log(i)
+        this.$http.get('/FindWeight', {
+          params: {
+            stuid: this.userId,
+            userid: this.userId,
+            expid: this.expData[i].id
+          }
+        })
+          .then(res2 => {
+            if (res2.data.code !== 1001) {
+            } else {
+              if (res2.data.data !== -1) {
+                this.expWeight[i] = res2.data.data
+                console.log(i)
+                console.log(this.expWeight[i])
+              } else {
+                this.this.expWeight[i] = 0
+              }
+            }
+          }).catch(err => {
+            console.log(err)
+          })
+      }
+    },
     select () {
       this.getAllData2()
       this.showModalSelectStudent = true
@@ -201,6 +277,8 @@ export default {
       this.getAllData()
     },
     distribute () {
+      this.getExp()
+      console.log('wwww' + this.expWeight)
       this.showModalDistribute = true
     },
     refreshData () {
@@ -279,8 +357,46 @@ export default {
     cancel () {
       this.showModalSelectStudent = false
     },
+    ok2 () {
+      if (this.totalNum > 100) {
+        this.showNoticeWarning('错误', '权重总和大于100！')
+        return
+      } else if (this.totalNum < 100) {
+        this.showNoticeWarning('错误', '权重总和小于100！')
+        return
+      }
+      for (var i = 0; i < this.expData.length; i++) {
+        let req = {
+          student_id: this.userId,
+          experiment_id: this.expData[i].id,
+          reason: '',
+          origin_score: 0,
+          score: this.expWeight[i],
+          appeal_time: '',
+          appeal_reason: '',
+          appeal_status: 0
+        }
+        this.$http.post('/peer/update', req)
+          .then(res => {
+            if (res.data.code === 1001) {
+              this.$Notice.success({
+                title: '提交成功',
+                desc: '评分成功'
+              })
+            } else {
+              this.$Message.error(res.data.msg)
+            }
+          }).catch(err => {
+            console.log(err)
+          })
+      }
+      this.showModalDistribute = false
+    },
+    cancel2 () {
+      this.showModalDistribute = false
+    },
     getExp () {
-      this.$http.get('/student/getExperimentByCourseId', {params: {courseId: this.courseID}})
+      this.$http.get('/teacher/getExperiment', {params: {course_id: this.courseID}})
         .then(res => {
           console.log(res)
           if (res.data.code === 1001) {
@@ -292,10 +408,8 @@ export default {
                 item.type = '考试'
               }
             })
-            // this.showData = this.expData.slice(0, this.pageSize)
-            // this.totalExpCount = res.data.data.length
-            // console.log(this.courseData)
             console.log(res.data.data)
+            this.initExpWeight()
           } else {
             this.$Message.error(res.data.msg)
           }

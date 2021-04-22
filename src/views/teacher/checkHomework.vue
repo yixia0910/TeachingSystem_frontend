@@ -61,8 +61,8 @@
         <el-form-item label="成绩" label-width="30px">
           <el-input type="number" v-model="form.score" autocomplete="off"
             oninput = "value=value.replace(/[^\d]/g,'')"
-            max="100"
-            placeholder="请不要超过最高分"></el-input>
+            :max="score"
+            placeholder="请不要超过满分"></el-input>
         </el-form-item>
         <el-form-item label="评语" label-width="400px">
           <el-input v-model="form.comment" autocomplete="off" maxlength="30"></el-input>
@@ -121,6 +121,14 @@ export default {
   },
   methods: {
     scoreSubmit () {
+      if (this.form.score > this.score) {
+        this.$Notice.warning({
+          title: '错误',
+          desc: '分数超过满分!'
+        })
+        return
+      }
+
       this.isMark = 0
       this.dialogFormVisible = false
       for (var i = 0; i < this.allData.length; i++) {
