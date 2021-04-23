@@ -210,6 +210,11 @@ const router = new Router({
       name: 'score',
       component: () => import('../views/teacher/score.vue')
     },
+    {
+      path: '/teacher/scoreList',
+      name: 'scoreList',
+      component: () => import('../views/teacher/scoreList.vue')
+    },
     /* admin view */
     {
       path: '/admin/member',

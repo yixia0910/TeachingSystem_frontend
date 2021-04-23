@@ -3,19 +3,45 @@
     <NavBar :username="this.$cookie.get('username')" infopage='/teacher/info' :breadlist="breadList">
       <div slot="navbarContent">
         <CardContent>
-          <TableComponent :loading="loading" @refresh="refreshData" ref="table" :columnsFromFather="columns1" :allDataFromFather="allData">
-            <Button type="primary" @click="select()">
+          <TableComponent :loading="loading" @refresh="refreshData" ref="table" :columnsFromFather="columns1" :allDataFromFather="allData" v-if="mark === 0">
+            <el-button type="primary" @click="select()">
               <span style="font-size: 14px">选择学生</span>
-            </Button>
-            <Button type="primary" @click="distribute()">
+            </el-button>
+            <el-button type="success" @click="distribute()">
               <span style="font-size: 14px">分配权重</span>
-            </Button>
-            <Button type="primary" @click="allToOne()">
-              <span style="font-size: 14px">生成总分</span>
-            </Button>
-            <Button type="primary" @click="see()">
+            </el-button>
+            <el-button type="warning" disabled v-if="totalNum !== 100">
+              <span style="font-size: 14px">设置总分</span>
+            </el-button>
+            <el-button type="warning" @click="allToOne()" v-if="totalNum === 100">
+              <span style="font-size: 14px">设置总分</span>
+            </el-button>
+            <el-button type="primary" disabled v-if="totalNum !== 100">
               <span style="font-size: 14px">查看总分</span>
-            </Button>
+            </el-button>
+            <el-button type="primary" @click="see()" v-if="totalNum === 100">
+              <span style="font-size: 14px">查看总分</span>
+            </el-button>
+          </TableComponent>
+          <TableComponent :loading="loading" @refresh="refreshData" ref="table" :columnsFromFather="columns3" :allDataFromFather="allData3" v-if="mark === 1">
+            <el-button type="primary" @click="select()">
+              <span style="font-size: 14px">选择学生</span>
+            </el-button>
+            <el-button type="success" @click="distribute()">
+              <span style="font-size: 14px">分配权重</span>
+            </el-button>
+            <el-button type="warning" disabled v-if="totalNum !== 100">
+              <span style="font-size: 14px">设置总分</span>
+            </el-button>
+            <el-button type="warning" @click="allToOne()" v-if="totalNum === 100">
+              <span style="font-size: 14px">设置总分</span>
+            </el-button>
+            <el-button type="primary" disabled v-if="totalNum !== 100">
+              <span style="font-size: 14px">查看总分</span>
+            </el-button>
+            <el-button type="primary" @click="see()" v-if="totalNum === 100">
+              <span style="font-size: 14px">查看总分</span>
+            </el-button>
           </TableComponent>
         </CardContent>
       </div>
@@ -77,6 +103,15 @@
         <Button type="primary" size="large" @click="ok2">确定</Button>
       </div>
     </Modal>
+    <el-dialog title="设置本课程总成绩分值" :visible.sync="dialogFormVisible">
+      <el-input type="number" v-model="score" autocomplete="off"
+        oninput = "value=value.replace(/[^\d]/g,'')"
+        ></el-input>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="scoreSubmit()">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -110,6 +145,8 @@ export default {
       stuID: '',
       userId: '',
       flag: 0,
+      mark: 0,
+      score: '',
       courseName: '',
       courseID: '',
       loading: false,
@@ -117,6 +154,7 @@ export default {
       breadList: [], // 面包屑
       showModalSelectStudent: false,
       showModalDistribute: false,
+      dialogFormVisible: false,
       operWorkingParam: {},
       allData: [],
       // 请求数据的url
@@ -199,12 +237,40 @@ export default {
                 on: {
                   click: () => {
                     this.choose(params.row.id)
+                    this.mark = 0
                   }
                 }
               }, '选择')
             ])
           }
         }
+      ],
+      allData3: [],
+      allDataUrl3: 'getStuTotalScore',
+      loading3: true,
+      columns3: [
+        {
+          title: '序号',
+          key: 'index',
+          width: 100,
+          sortable: 'number'
+        },
+        {
+          title: '学生学号',
+          key: 'id',
+          width: '150',
+          sortable: 'custom'
+        },
+        {
+          title: '学生姓名',
+          key: 'name',
+          sortable: 'custom'
+        },
+        {
+          title: '总分',
+          key: 'score',
+          width: 80
+        },
       ],
       Header: [
         {
@@ -239,16 +305,25 @@ export default {
     this.breadList = JSON.parse(sessionStorage.getItem('score_breadList'))
     this.breadList.push({name: '成绩统计', path: this.$route.fullPath})
     this.getExp()
+    this.getTotalScore()
   },
   methods: {
+    see () {
+      sessionStorage.setItem('scoreList_courseID', this.courseID)
+      sessionStorage.setItem('scoreList_courseName', this.courseName)
+      sessionStorage.setItem('scoreList_breadList', JSON.stringify(this.breadList))
+      this.$router.push({
+        path: '/teacher/scoreList'
+      })
+    },
     initExpWeight () {
       for (let i = 0; i < this.expData.length; i++) {
-        console.log(i)
         this.$http.get('/FindWeight', {
           params: {
             stuid: this.userId,
             userid: this.userId,
-            expid: this.expData[i].id
+            expid: this.expData[i].id,
+            type: 2
           }
         })
           .then(res2 => {
@@ -256,8 +331,6 @@ export default {
             } else {
               if (res2.data.data !== -1) {
                 this.expWeight[i] = res2.data.data
-                console.log(i)
-                console.log(this.expWeight[i])
               } else {
                 this.this.expWeight[i] = 0
               }
@@ -278,7 +351,6 @@ export default {
     },
     distribute () {
       this.getExp()
-      console.log('wwww' + this.expWeight)
       this.showModalDistribute = true
     },
     refreshData () {
@@ -374,14 +446,14 @@ export default {
           score: this.expWeight[i],
           appeal_time: '',
           appeal_reason: '',
-          appeal_status: 0
+          appeal_status: 2
         }
         this.$http.post('/peer/update', req)
           .then(res => {
             if (res.data.code === 1001) {
               this.$Notice.success({
                 title: '提交成功',
-                desc: '评分成功'
+                desc: '分配成功'
               })
             } else {
               this.$Message.error(res.data.msg)
@@ -392,13 +464,143 @@ export default {
       }
       this.showModalDistribute = false
     },
+    allToOne () {
+      this.score = 0
+      this.getTotalScore()
+      this.dialogFormVisible = true
+    },
+    computeStuTotalScore () {
+      if (this.courseID === '' || typeof (this.courseID) === 'undefined') {
+        return
+      }
+      this.$http.get(this.allDataUrl2, {
+        params: {
+          courseId: this.courseID
+        }
+      })
+        .then(res => {
+          if (res.data.code === 1001) {
+            this.allData2 = res.data.data
+            console.log(this.allData2)
+            var my = this
+            this.allData2.forEach(function (item, index) {
+              my.$http.get(my.allDataUrl, {
+                params: {
+                  course_id: my.courseID,
+                  student_id: item.id
+                }
+              })
+                .then(res2 => {
+                  if (res2.data.code === 1001) {
+                    my.allData = res2.data.data
+                    console.log(my.allData)
+                    var num = 0
+                    var flag = 0
+                    for (var i = 0; i < my.allData.length; i++) {
+                      flag = my.allData[i].score / my.allData[i].vm_status
+                      num = num + flag * my.expWeight[i]
+                    }
+                    num = num * 100 /my.score
+                    num = num.toFixed(2)
+                    console.log('tonum'+ ' ' + num)
+                    let req = {
+                      student_id: item.id,
+                      experiment_id: my.courseID,
+                      reason: '',
+                      origin_score: 0,
+                      score: num,
+                      appeal_time: '',
+                      appeal_reason: '',
+                      appeal_status: 3
+                    }
+                    my.$http.post('/commitScore', req)
+                      .then(res3 => {
+                        if (res3.data.code === 1001) {
+                          // this.$Notice.success({
+                          //   title: '提交成功',
+                          //   desc: '分配成功'
+                          // })
+                          my.allData = []
+                        } else {
+                          my.$Message.error(res3.data.msg)
+                        }
+                      }).catch(err => {
+                        console.log(err)
+                      })
+                  } else {
+                    my.$Message.error(res2.data.msg)
+                  }
+                })
+                .catch(err => {
+                  console.log(err)
+                })
+            })
+          } else {
+            this.$Message.error(res.data.msg)
+            this.allData2 = []
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        }).then(() => {
+          this.loading = false
+        })
+    },
+    scoreSubmit () {
+      this.dialogFormVisible = false
+      let req = {
+        student_id: this.courseID,
+        experiment_id: Number(this.courseID),
+        reason: '',
+        origin_score: 0,
+        score: this.score,
+        appeal_time: '',
+        appeal_reason: '',
+        appeal_status: 1
+      }
+      this.$http.post('/commitScore', req)
+        .then(res => {
+          if (res.data.code === 1001) {
+            this.$Notice.success({
+              title: '提交成功',
+              desc: '分配成功'
+            })
+            this.computeStuTotalScore()
+          } else {
+            this.$Message.error(res.data.msg)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+    },
+    getTotalScore () {
+      this.$http.get('/FindWeight', {
+        params: {
+          stuid: this.courseID,
+          userid: this.courseID,
+          expid: Number(this.courseID),
+          type: 1
+        }
+      })
+        .then(res2 => {
+          if (res2.data.code !== 1001) {
+          } else {
+            if (res2.data.data !== -1) {
+              this.score = res2.data.data
+            } else {
+              this.score = 0
+            }
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+    },
     cancel2 () {
       this.showModalDistribute = false
     },
     getExp () {
       this.$http.get('/teacher/getExperiment', {params: {course_id: this.courseID}})
         .then(res => {
-          console.log(res)
           if (res.data.code === 1001) {
             this.expData = res.data.data
             this.expData.forEach(function (item) {
