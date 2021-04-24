@@ -259,7 +259,7 @@ export default {
     setScore () {
       this.computeScore()
       this.form2.score = ''
-      this.score2.comment = ''
+      this.form2.comment = ''
       this.dialogTableVisible = true
     },
     downloadAllAssignment () {

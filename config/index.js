@@ -19,7 +19,8 @@ module.exports = {
         },
       },
       '/apis': {
-        target: 'http://localhost:54067',
+        target: 'http://localhost:54067/api',
+        // target: 'http://teaching.scs.buaa.edu.cn/api',
         changeOrigin: true,
         pathRewrite: {
           '^/apis': ''

@@ -73,7 +73,7 @@
               <Span class="basic-info-item-content">{{course}}</Span><br>
               <label class="basic-info-item">指导教师</label>
               <Span class="basic-info-item-content">{{teacher}}</Span><br>
-              <label class="basic-info-item">满分</label>
+              <label class="basic-info-item">满分&nbsp;&nbsp;&nbsp;&nbsp;</label>
               <Span class="basic-info-item-content">{{score}}</Span>
 
             </div>
@@ -295,12 +295,48 @@ export default {
           } else {
             this.$Message.error(res.data.msg)
           }
+          this.$http.get('/FindComment', {
+            params: {
+              stuid: this.stuId,
+              userid: this.teacher_id,
+              expid: this.expId
+            }
+          })
+            .then(res2 => {
+              if (res2.data.code !== 1001) {
+              } else {
+                if (res2.data.data !== -1) {
+                  this.comment = res2.data.data
+                }
+              }
+            }).catch(err => {
+              console.log(err)
+            })
         }).catch(err => {
           console.log(err)
         })
     },
     getGrade () {
       this.$http.get('/FindScore', {
+        params: {
+          stuid: this.stuId,
+          userid: this.teacher_id,
+          expid: this.expID
+        }
+      })
+        .then(res2 => {
+          if (res2.data.code !== 1001) {
+          } else {
+            if (res2.data.data !== -1) {
+              this.grade = res2.data.data
+            }
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+    },
+    getComment () {
+      this.$http.get('/FindComment', {
         params: {
           stuid: this.stuId,
           userid: this.teacher_id,

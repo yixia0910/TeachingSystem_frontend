@@ -107,8 +107,8 @@ export default {
           title: '总分',
           key: 'score',
           width: 80
-        },
-      ],
+        }
+      ]
     }
   },
   mounted () {
@@ -135,9 +135,9 @@ export default {
         .then(res => {
           if (res.data.code === 1001) {
             this.allData3 = res.data.data
-            this.allData3.forEach( function (item) {
-                item.score = parseFloat(item.score)
-                item.score = item.score.toFixed(2)
+            this.allData3.forEach(function (item) {
+              item.score = parseFloat(item.score)
+              item.score = item.score.toFixed(2)
             })
           } else {
             this.$Message.error(res.data.msg)
@@ -159,10 +159,10 @@ export default {
       })
     },
     refreshData () {
-    this.loading = true
-    this.getExp()
-    this.getTotalScore()
-    this.see()
+      this.loading = true
+      this.getExp()
+      this.getTotalScore()
+      this.see()
     },
     getTotalScore () {
       this.$http.get('/FindWeight', {

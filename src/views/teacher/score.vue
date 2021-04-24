@@ -270,7 +270,7 @@ export default {
           title: '总分',
           key: 'score',
           width: 80
-        },
+        }
       ],
       Header: [
         {
@@ -500,9 +500,9 @@ export default {
                       flag = my.allData[i].score / my.allData[i].vm_status
                       num = num + flag * my.expWeight[i]
                     }
-                    num = num * 100 /my.score
+                    num = num * 100 / my.score
                     num = num.toFixed(2)
-                    console.log('tonum'+ ' ' + num)
+                    console.log('tonum' + ' ' + num)
                     let req = {
                       student_id: item.id,
                       experiment_id: my.courseID,

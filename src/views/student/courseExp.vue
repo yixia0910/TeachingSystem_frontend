@@ -55,11 +55,22 @@ export default {
         {
           title: '开始时间',
           key: 'start_time',
-          sortable: true
+          width: 200
+          // sortable: true
         },
         {
           title: '结束时间',
           key: 'end_time',
+          width: 200
+        },
+        {
+          title: '分数',
+          key: 'score',
+          sortable: true
+        },
+        {
+          title: '满分',
+          key: 'vm_status',
           sortable: true
         },
         // {
@@ -109,25 +120,28 @@ export default {
       term: '',
       titleName: '',
       titleTeacher: '',
-      termId: 0
+      termId: 0,
+      userId: this.$cookie.get('userId'),
+      teacherId: ''
     }
   },
   mounted () {
     localStorage.setItem('courseId', this.course.courseId)
-    console.log(this.course.courseId)
-    console.log('hello')
     this.getCurrentTermFirst()
     this.getCourseInfo()
   },
   methods: {
     getCourseInfo () {
       this.$http.get('/getCourse', {params: {
-        courseID: this.courseID
+        courseID: this.course.courseId
       }})
         .then(res => {
           if (res.data.code === 1001) {
             console.log(res.data)
             this.isOver = res.data.data.isOver
+            this.teacherId = res.data.data.teacher_id
+            console.log(this.teacherId)
+            this.getExp(this.course.courseId)
           } else {
           }
         })
@@ -146,7 +160,6 @@ export default {
           this.term = res.data.data.name
           this.titleName = this.course.courseName
           this.titleTeacher = this.course.teacher
-          this.getExp(this.course.courseId)
           this.getCourse()
         })
         .catch(err => {
@@ -154,9 +167,13 @@ export default {
         })
     },
     getExp (courseid) {
-      this.$http.get('/student/getExperimentByCourseId', {params: {courseId: courseid}})
+      this.$http.get('/student/getExperimentByCourseId', {
+        params: {
+          courseId: courseid,
+          teacherId: this.teacherId
+          }
+        })
         .then(res => {
-          console.log(res)
           if (res.data.code === 1001) {
             this.expData = res.data.data
             this.expData.forEach(function (item) {
@@ -166,10 +183,7 @@ export default {
                 item.type = '考试'
               }
             })
-            // this.showData = this.expData.slice(0, this.pageSize)
-            // this.totalExpCount = res.data.data.length
-            // console.log(this.courseData)
-            console.log(res.data.data)
+            console.log(this.expData)
           } else {
             this.$Message.error(res.data.msg)
           }
